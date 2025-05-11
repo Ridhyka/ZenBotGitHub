@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
+import GeminiClient from "@/lib/gemini-client" // Adjust the import path as needed
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
-// Fallback responses when API key is invalid
+// Fallback responses when API key is invalid or request fails
 const fallbackResponses = [
   "I'm here to listen and support you. Could you tell me more about how you're feeling?",
   "Thank you for sharing that with me. It takes courage to open up about your feelings.",
@@ -11,6 +12,17 @@ const fallbackResponses = [
   "Your mental health matters. What small step could you take today to care for yourself?",
   "I'm sorry to hear you're going through this. Would it help to talk more about what's on your mind?",
 ]
+
+// Updated list of models to try based on the actual available models
+const modelsToTry = [
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-001",
+  "gemini-1.5-flash-002",
+  "gemini-1.5-flash-8b-001",
+  "gemini-1.5-pro-002",
+  "gemini-1.5-pro-001",
+  "text-bison-001"
+];
 
 export async function POST(req: Request) {
   try {
@@ -20,17 +32,13 @@ export async function POST(req: Request) {
     // Get API key from environment variables
     const apiKey = process.env.GEMINI_API_KEY
 
-    // Check if API key exists and has a valid format
-    if (!apiKey || apiKey === "your_gemini_api_key_here" || apiKey.trim() === "") {
-      console.log("API key is not configured or is invalid - using fallback response")
-
-      // Return a fallback response instead of an error
-      const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
-
+    // Check if API key exists
+    if (!apiKey) {
+      console.error("GEMINI_API_KEY environment variable is not set")
       return NextResponse.json({
-        response: fallbackResponse,
-        source: "fallback",
-      })
+        response: "Configuration error: API key not found in environment variables",
+        source: "error",
+      }, { status: 500 })
     }
 
     // System prompt to guide Gemini to be empathetic and supportive
@@ -43,97 +51,101 @@ export async function POST(req: Request) {
     Keep responses concise (2-3 paragraphs maximum) and conversational.
     Use a warm, supportive tone throughout the conversation.`
 
-    // Format the request for Gemini
-    // Using the generateContent endpoint for the gemini-pro model
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
-
-    // Format the request for Gemini
-    const requestBody = {
-      contents: [
-        {
-          parts: [{ text: systemPrompt }],
-        },
-        {
-          parts: [{ text: latestMessage }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-      ],
-    }
+    // Format messages for Gemini API
+    const formattedMessages = [
+      { role: "user", parts: [{ text: systemPrompt }] },
+      ...messages.map(msg => ({
+        role: msg.role === "user" ? "user" : "model",
+        parts: [{ text: msg.content }]
+      }))
+    ]
 
     try {
-      // Make the request to Gemini API
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      })
-
-      if (!response.ok) {
-        console.log("Gemini API returned an error - using fallback response")
-        // Return a fallback response instead of an error
-        const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
+      // Start with the default model
+      const geminiClient = new GeminiClient(apiKey, "gemini-1.5-flash");
+      
+      // List available models first
+      let availableModels = [];
+      try {
+        const modelResponse = await geminiClient.listModels();
+        availableModels = modelResponse.models || [];
+      } catch (listError) {
+        console.error("Error listing models:", listError);
+        // Continue with the default models to try
+      }
+      
+      // Attempt to call the available Gemini model
+      let response = null;
+      let lastError = null;
+      
+      // First try models that we know exist
+      for (const model of modelsToTry) {
+        try {
+          // Update the model name
+          geminiClient.modelName = model;
+          
+          // Try to generate content with this model
+          console.log(`Attempting to use model: ${model}`);
+          response = await geminiClient.generateContent(formattedMessages);
+          
+          // If we reach here, the model worked
+          console.log(`Successfully used model: ${model}`);
+          break;
+        } catch (modelError) {
+          lastError = modelError;
+          console.error(`Failed with model ${model}:`, modelError);
+          
+          // If it's not a quota error, continue to the next model
+          if (!(modelError instanceof Error && modelError.message.includes("quota"))) {
+            continue;
+          }
+          
+          // If it's a quota error, wait briefly and try the next model
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      
+      // If we have a successful response
+      if (response) {
+        const responseText =
+          response.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "I'm sorry, I couldn't generate a response. Please try again."
 
         return NextResponse.json({
-          response: fallbackResponse,
-          source: "fallback",
-        })
+          response: responseText,
+          source: "gemini",
+        });
       }
-
-      const data = await response.json()
-
-      // Extract the response text from Gemini
-      const responseText =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "I'm sorry, I couldn't generate a response. Please try again."
-
-      return NextResponse.json({
-        response: responseText,
-        source: "gemini",
-      })
+      
+      // If all models failed, throw the last error
+      if (lastError) {
+        throw lastError;
+      }
+      
+      throw new Error("All models failed without specific errors");
+      
     } catch (error) {
-      console.log("Error making request to Gemini API:", error)
+      console.error("Error making request to Gemini API:", error)
+      
       // Return a fallback response instead of an error
       const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
 
       return NextResponse.json({
         response: fallbackResponse,
         source: "fallback",
+        error: error instanceof Error ? error.message : "Unknown error"
       })
     }
   } catch (error) {
-    console.log("Error in Gemini API route:", error)
+    console.error("Error in Gemini API route:", error)
 
     // Return a fallback response instead of an error
     const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
 
     return NextResponse.json({
-      response: fallbackResponse,
-      source: "fallback",
+        response: fallbackResponse,
+        source: "fallback",
+        error: error instanceof Error ? error.message : "Unknown error"
     })
   }
 }
