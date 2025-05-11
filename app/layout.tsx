@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "ZenBot - Mental Health Support",
   description: "Anonymous, empathetic mental health support chatbot",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({

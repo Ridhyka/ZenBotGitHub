@@ -48,8 +48,8 @@ export default function Chat() {
   const [showMoodPrompt, setShowMoodPrompt] = useState(false)
   const [lastActivity, setLastActivity] = useState(Date.now())
   const [showAchievement, setShowAchievement] = useState(false)
-  const [usingFallback, setUsingFallback] = useState(false)
-  const [showFallbackAlert, setShowFallbackAlert] = useState(false)
+  const [usingHuggingFace, setUsingHuggingFace] = useState(true)
+  const [showHFTokenAlert, setShowHFTokenAlert] = useState(false)
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function Chat() {
 
     try {
       // First try the Gemini API
-      let response = await fetch("/api/gemini", {
+      const response = await fetch("/api/huggingface", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,29 +110,16 @@ export default function Chat() {
         }),
       })
 
-      let data = await response.json()
+      const data = await response.json()
 
-      // If we get a fallback response from Gemini API, try the mock API
-      if (data.source === "fallback" && !usingFallback) {
-        setUsingFallback(true)
-        setShowFallbackAlert(true)
-
-        // Try the mock API instead
-        response = await fetch("/api/mock-chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage],
-          }),
-        })
-
-        data = await response.json()
+      // If we get a fallback response from Hugging Face API, show the alert
+      if (data.source === "fallback" && !usingHuggingFace) {
+        setUsingHuggingFace(false)
+        setShowHFTokenAlert(true)
 
         // Hide the alert after 5 seconds
         setTimeout(() => {
-          setShowFallbackAlert(false)
+          setShowHFTokenAlert(false)
         }, 5000)
       }
 
@@ -168,13 +155,13 @@ export default function Chat() {
         }
         setMessages((prev) => [...prev, assistantMessage])
 
-        if (!usingFallback) {
-          setUsingFallback(true)
-          setShowFallbackAlert(true)
+        if (!usingHuggingFace) {
+          setUsingHuggingFace(false)
+          setShowHFTokenAlert(true)
 
           // Hide the alert after 5 seconds
           setTimeout(() => {
-            setShowFallbackAlert(false)
+            setShowHFTokenAlert(false)
           }, 5000)
         }
       } catch (fallbackError) {
@@ -344,7 +331,7 @@ export default function Chat() {
         onClose={() => setShowAchievement(false)}
       />
 
-      {showFallbackAlert && (
+      {showHFTokenAlert && (
         <Alert
           variant="warning"
           className="mb-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
@@ -352,8 +339,8 @@ export default function Chat() {
           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <AlertTitle className="text-amber-600 dark:text-amber-400">API Key Not Configured</AlertTitle>
           <AlertDescription>
-            ZenBot is running in basic mode. To use the Gemini AI, please add a valid API key to your environment
-            variables.
+            ZenBot is running in basic mode. To use the Hugging Face API, please add a valid API token to your
+            environment variables.
           </AlertDescription>
         </Alert>
       )}
@@ -362,9 +349,9 @@ export default function Chat() {
         <CardHeader className="bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500 dark:from-teal-600 dark:via-blue-600 dark:to-purple-600 border-b-0">
           <CardTitle className="text-white flex items-center">
             <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
-            Chat with ZenBot {usingFallback ? "(Basic Mode)" : "(Powered by Gemini)"}
+            Chat with ZenBot {!usingHuggingFace ? "(Basic Mode)" : "(Powered by Hugging Face)"}
             <Badge className="ml-auto bg-white/20 hover:bg-white/30 text-white">
-              {usingFallback ? "Basic Mode" : "AI Powered"}
+              {!usingHuggingFace ? "Basic Mode" : "AI Powered"}
             </Badge>
           </CardTitle>
         </CardHeader>
