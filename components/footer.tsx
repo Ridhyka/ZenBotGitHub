@@ -36,7 +36,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="https://linkedin.com" className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+              <Link href="https://www.linkedin.com/in/ridhika-shekhawat/" className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
@@ -125,7 +125,7 @@ export function Footer() {
               <div className="flex flex-col space-y-2">
                 <Input 
                   type="email" 
-                  placeholder="Your email" 
+                  placeholder="ridhikashekhawat77@gmail.com" 
                   className="border-gray-300 dark:border-gray-700 focus:border-violet-500 dark:focus:border-violet-400"
                 />
                 <Button 
