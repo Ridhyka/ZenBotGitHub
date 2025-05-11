@@ -202,54 +202,84 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="w-full py-12 md:py-24 bg-gradient-to-b from-violet-50 to-white dark:from-violet-950/30 dark:to-slate-950 relative overflow-hidden">
-        {/* Background elements */}
-        <div className="absolute inset-0 bg-confetti-pattern opacity-5"></div>
-
+      {/* Additional Features Section */}
+      <section className="w-full py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white dark:from-slate-900 dark:to-slate-950 relative overflow-hidden">
         <div className="container px-4 md:px-6 relative z-10">
-          <div className="text-center mb-12">
-            <Badge className="mb-4 px-4 py-2 text-sm bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white rounded-full shadow-glow-fuchsia">
-              Success Stories
-            </Badge>
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-amber-600 dark:from-violet-400 dark:via-fuchsia-400 dark:to-amber-400 text-transparent bg-clip-text animate-gradient">
-              Hear from Our Community
-            </h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="overflow-hidden group hover:shadow-2xl transition-all duration-500 border-0 bg-gradient-to-br from-white to-violet-50 dark:from-slate-800 dark:to-violet-950/30 animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.2}s` }}
-              >
-                <CardContent className="p-6 relative">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-gradient-to-r from-violet-400 to-fuchsia-400 p-2 rounded-full shadow-glow-violet transform rotate-12 group-hover:rotate-0 transition-transform duration-300">
-                    <Star className="h-5 w-5 text-white animate-spin-slow" />
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <Badge className="px-3 py-1 text-xs bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 rounded-full">
+                Advanced Features
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-gray-900 dark:text-white">
+                Personalized Mental Wellness Journey
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
+                ZenBot adapts to your needs, learning from your interactions to provide increasingly personalized support over time.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="bg-violet-100 dark:bg-violet-900/30 p-2 rounded-full mr-4">
+                    <Zap className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   </div>
-                  <div className="mb-4">
-                    <div className="flex">
-                      {Array(testimonial.rating)
-                        .fill(0)
-                        .map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-5 w-5 text-amber-400 fill-amber-400 animate-pulse-staggered"
-                            style={{ animationDelay: `${i * 0.2}s` }}
-                          />
-                        ))}
-                    </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">Guided Meditation Sessions</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Access a library of specialized meditation exercises for different emotional states.</p>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 italic mb-4">"{testimonial.quote}"</p>
-                  <p className="font-semibold text-fuchsia-600 dark:text-fuchsia-400">{testimonial.author}</p>
-
-                  {/* Decorative elements */}
-                  <div className="absolute bottom-2 right-2 opacity-10 text-6xl font-serif">"</div>
-                  <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-r from-violet-400/5 to-fuchsia-400/5 rounded-full blur-2xl group-hover:opacity-100 opacity-0 transition-opacity"></div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="bg-fuchsia-100 dark:bg-fuchsia-900/30 p-2 rounded-full mr-4">
+                    <Zap className="h-5 w-5 text-fuchsia-600 dark:text-fuchsia-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">Journal Prompts</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Receive tailored writing prompts that encourage self-reflection and emotional processing.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="bg-amber-100 dark:bg-amber-900/30 p-2 rounded-full mr-4">
+                    <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">Progress Reports</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Review weekly insights about your emotional patterns and wellness journey.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="relative">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100 dark:border-gray-800 relative z-10">
+                <div className="space-y-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Private & Secure</h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Your conversations and data are encrypted and never shared. We prioritize your privacy and security at every step.
+                  </p>
+                  
+                  <ul className="space-y-3">
+                    <li className="flex items-center text-gray-600 dark:text-gray-300">
+                      <Shield className="h-5 w-5 text-green-500 mr-2" /> End-to-end encryption
+                    </li>
+                    <li className="flex items-center text-gray-600 dark:text-gray-300">
+                      <Shield className="h-5 w-5 text-green-500 mr-2" /> HIPAA-compliant data storage
+                    </li>
+                    <li className="flex items-center text-gray-600 dark:text-gray-300">
+                      <Shield className="h-5 w-5 text-green-500 mr-2" /> No data sharing with third parties
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -z-10 top-10 -right-10 w-40 h-40 bg-violet-200/50 dark:bg-violet-900/20 rounded-full blur-xl"></div>
+              <div className="absolute -z-10 -bottom-10 -left-10 w-40 h-40 bg-fuchsia-200/50 dark:bg-fuchsia-900/20 rounded-full blur-xl"></div>
+            </div>
           </div>
         </div>
       </section>

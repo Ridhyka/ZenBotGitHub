@@ -41,6 +41,7 @@ export default function Dashboard() {
       icon: Award,
       color: "from-amber-400 to-orange-400",
       bgColor: "from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20",
+      borderColor: "border-amber-200 dark:border-amber-800", // Added missing borderColor property
     },
     {
       name: "Consistent Check-ins",
@@ -49,6 +50,7 @@ export default function Dashboard() {
       icon: Calendar,
       color: "from-violet-400 to-fuchsia-400",
       bgColor: "from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20",
+      borderColor: "border-violet-200 dark:border-violet-800", // Added missing borderColor property
     },
     {
       name: "Mood Tracker",
@@ -57,6 +59,7 @@ export default function Dashboard() {
       icon: TrendingUp,
       color: "from-emerald-400 to-green-400",
       bgColor: "from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20",
+      borderColor: "border-emerald-200 dark:border-emerald-800", // Added missing borderColor property
     },
   ]
 
